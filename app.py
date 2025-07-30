@@ -125,3 +125,15 @@ def manual_assign():
         return redirect('/')
     data = load_data()
     return render_template('manual_assign.html', stages=data.keys(), participants=participants_list)
+
+@app.route('/clear_data')
+def clear_data():
+    if os.path.exists(DATA_FILE):
+        os.remove(DATA_FILE)
+    return redirect('/')
+
+@app.route('/clear_participants')
+def clear_participants():
+    if os.path.exists(PARTICIPANT_FILE):
+        os.remove(PARTICIPANT_FILE)
+    return redirect('/participants')
