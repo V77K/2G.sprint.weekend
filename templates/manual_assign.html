@@ -3,22 +3,26 @@
 {% block content %}
 <h4>Ручное добавление участников</h4>
 <form method="post">
-  <div class="mb-3">
-    <label>Этап</label>
+  <div class="mb-2">
+    <label>Этап:</label>
     <select name="stage" class="form-control">
       {% for s in stages %}
         <option value="{{s}}">{{s}}</option>
       {% endfor %}
     </select>
   </div>
-  <div class="mb-3">
-    <label>Группа</label>
-    <input name="group" class="form-control" required>
+  <div class="mb-2">
+    <label>Группа:</label>
+    <input name="group" class="form-control">
   </div>
-  <div class="mb-3">
-    <label>Фамилии участников (по одной на строку)</label>
-    <textarea name="participants" class="form-control" rows="8"></textarea>
+  <div class="mb-2">
+    <label>Выберите участников:</label>
+    <select name="participants" class="form-control" multiple size="10">
+      {% for p in participants %}
+        <option value="{{p}}">{{p}}</option>
+      {% endfor %}
+    </select>
   </div>
-  <button type="submit" class="btn btn-warning">Добавить</button>
+  <button class="btn btn-danger">Добавить</button>
 </form>
 {% endblock %}

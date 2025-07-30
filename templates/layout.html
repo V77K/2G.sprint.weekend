@@ -8,6 +8,12 @@
 <body class="bg-light p-4">
   <div class="container">
     <h2 class="mb-4">Race Manager</h2>
+    <a href="/" class="btn btn-outline-primary btn-sm">🏠 Главная</a>
+    <a href="/participants" class="btn btn-outline-secondary btn-sm">📋 Участники</a>
+    <a href="/create_stage" class="btn btn-outline-success btn-sm">➕ Этап</a>
+    <a href="/auto_assign" class="btn btn-outline-warning btn-sm">⚙️ Авто-разбивка</a>
+    <a href="/manual_assign" class="btn btn-outline-danger btn-sm">✍️ Ручной ввод</a>
+    <hr>
     {% block content %}{% endblock %}
   </div>
 </body>

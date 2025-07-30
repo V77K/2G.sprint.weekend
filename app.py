@@ -6,6 +6,7 @@ import random
 
 app = Flask(__name__)
 DATA_FILE = 'data.json'
+PARTICIPANT_FILE = 'participants.json'
 
 def load_data():
     if not os.path.exists(DATA_FILE):
@@ -16,6 +17,16 @@ def load_data():
 def save_data(data):
     with open(DATA_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+
+def load_participants():
+    if not os.path.exists(PARTICIPANT_FILE):
+        return []
+    with open(PARTICIPANT_FILE, 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+def save_participants(participants):
+    with open(PARTICIPANT_FILE, 'w', encoding='utf-8') as f:
+        json.dump(participants, f, ensure_ascii=False, indent=2)
 
 def get_used_numbers_for_participant(data, participant):
     used = set()
@@ -36,7 +47,17 @@ def get_next_free_number(data, group_participants, participant):
 @app.route('/')
 def index():
     data = load_data()
-    return render_template('index.html', stages=data.keys())
+    return render_template('index.html', data=data)
+
+@app.route('/participants', methods=['GET', 'POST'])
+def participants():
+    if request.method == 'POST':
+        raw = request.form['participants']
+        participants = [p.strip() for p in raw.strip().split('\n') if p.strip()]
+        save_participants(participants)
+        return redirect('/')
+    current = load_participants()
+    return render_template('participants.html', participants=current)
 
 @app.route('/create_stage', methods=['GET', 'POST'])
 def create_stage():
@@ -51,10 +72,14 @@ def create_stage():
 
 @app.route('/auto_assign', methods=['GET', 'POST'])
 def auto_assign():
+    participants_list = load_participants()
     if request.method == 'POST':
         stage = request.form['stage']
         group_count = int(request.form['groups'])
-        names = request.form['names'].strip().split('\n')
+        if 'use_global' in request.form:
+            names = participants_list
+        else:
+            names = request.form['names'].strip().split('\n')
         random.shuffle(names)
 
         data = load_data()
@@ -80,10 +105,11 @@ def auto_assign():
 
 @app.route('/manual_assign', methods=['GET', 'POST'])
 def manual_assign():
+    participants_list = load_participants()
     if request.method == 'POST':
         stage = request.form['stage']
         group = request.form['group']
-        participants = [p.strip() for p in request.form['participants'].split('\n') if p.strip()]
+        selected = request.form.getlist('participants')
 
         data = load_data()
         if stage not in data:
@@ -91,16 +117,11 @@ def manual_assign():
         if group not in data[stage]:
             data[stage][group] = {}
 
-        for participant in participants:
+        for participant in selected:
             number = get_next_free_number(data, data[stage][group], participant)
             data[stage][group][participant] = number
 
         save_data(data)
         return redirect('/')
     data = load_data()
-    return render_template('manual_assign.html', stages=data.keys())
-
-@app.route('/history')
-def history():
-    data = load_data()
-    return render_template('history.html', data=data)
+    return render_template('manual_assign.html', stages=data.keys(), participants=participants_list)

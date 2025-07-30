@@ -1,18 +1,16 @@
 
 {% extends "layout.html" %}
 {% block content %}
-  <div class="mb-4">
-    <h3>Добро пожаловать</h3>
-    <p>Выберите действие:</p>
-    <a href="/create_stage" class="btn btn-primary me-2">Создать этап</a>
-    <a href="/auto_assign" class="btn btn-success me-2">Авто-разбивка по группам</a>
-    <a href="/manual_assign" class="btn btn-warning me-2">Ручное добавление участников</a>
-    <a href="/history" class="btn btn-secondary">История</a>
-  </div>
-  <h5>Существующие этапы:</h5>
-  <ul>
-    {% for s in stages %}
-      <li>{{ s }}</li>
+<h4>Все этапы и участники:</h4>
+{% for stage, groups in data.items() %}
+  <h5>{{stage}}</h5>
+  {% for group, members in groups.items() %}
+    <b>{{group}}</b>
+    <ul>
+    {% for name, number in members.items() %}
+      <li>{{name}} — №{{number}}</li>
     {% endfor %}
-  </ul>
+    </ul>
+  {% endfor %}
+{% endfor %}
 {% endblock %}

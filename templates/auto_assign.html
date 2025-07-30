@@ -1,24 +1,28 @@
 
 {% extends "layout.html" %}
 {% block content %}
-<h4>Автоматическая разбивка по группам</h4>
+<h4>Автоматическая разбивка на группы</h4>
 <form method="post">
-  <div class="mb-3">
-    <label>Этап</label>
+  <div class="mb-2">
+    <label>Этап:</label>
     <select name="stage" class="form-control">
       {% for s in stages %}
         <option value="{{s}}">{{s}}</option>
       {% endfor %}
     </select>
   </div>
-  <div class="mb-3">
-    <label>Количество групп</label>
-    <input type="number" name="groups" class="form-control" required>
+  <div class="mb-2">
+    <label>Количество групп:</label>
+    <input name="groups" type="number" class="form-control">
   </div>
-  <div class="mb-3">
-    <label>Список фамилий (по одной на строку)</label>
-    <textarea name="names" class="form-control" rows="10"></textarea>
+  <div class="mb-2">
+    <label>Список фамилий (если не использовать глобальный):</label>
+    <textarea name="names" class="form-control" rows="5"></textarea>
   </div>
-  <button type="submit" class="btn btn-success">Разбить</button>
+  <div class="form-check mb-2">
+    <input type="checkbox" name="use_global" class="form-check-input" id="use_global">
+    <label for="use_global" class="form-check-label">📋 Использовать глобальный список</label>
+  </div>
+  <button class="btn btn-warning">Разбить</button>
 </form>
 {% endblock %}

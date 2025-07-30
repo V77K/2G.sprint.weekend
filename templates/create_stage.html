@@ -3,10 +3,7 @@
 {% block content %}
 <h4>Создание нового этапа</h4>
 <form method="post">
-  <div class="mb-3">
-    <label>Название этапа</label>
-    <input name="stage" class="form-control" required>
-  </div>
-  <button type="submit" class="btn btn-primary">Создать</button>
+  <input name="stage" class="form-control mb-3" required placeholder="Например: Квалификация 1">
+  <button class="btn btn-success">Создать</button>
 </form>
 {% endblock %}
