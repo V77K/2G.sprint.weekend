@@ -1,6 +1,18 @@
 
-<h2>Добро пожаловать</h2>
-<p><a href="/create_stage">Создать этап</a></p>
-<p><a href="/auto_assign">Авто-разбивка по группам</a></p>
-<p><a href="/manual_assign">Ручное добавление участника</a></p>
-<p><a href="/history">История номеров</a></p>
+{% extends "layout.html" %}
+{% block content %}
+  <div class="mb-4">
+    <h3>Добро пожаловать</h3>
+    <p>Выберите действие:</p>
+    <a href="/create_stage" class="btn btn-primary me-2">Создать этап</a>
+    <a href="/auto_assign" class="btn btn-success me-2">Авто-разбивка по группам</a>
+    <a href="/manual_assign" class="btn btn-warning me-2">Ручное добавление участников</a>
+    <a href="/history" class="btn btn-secondary">История</a>
+  </div>
+  <h5>Существующие этапы:</h5>
+  <ul>
+    {% for s in stages %}
+      <li>{{ s }}</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

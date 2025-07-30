@@ -1,13 +1,16 @@
 
-<h3>История участников</h3>
+{% extends "layout.html" %}
+{% block content %}
+<h4>История участников</h4>
 {% for stage, groups in data.items() %}
-  <h4>{{stage}}</h4>
+  <h5>{{stage}}</h5>
   {% for group, members in groups.items() %}
-    <b>{{group}}</b><br>
+    <b>{{group}}</b>
     <ul>
-    {% for name, number in members.items() %}
-      <li>{{name}} — №{{number}}</li>
-    {% endfor %}
+      {% for name, number in members.items() %}
+        <li>{{name}} — №{{number}}</li>
+      {% endfor %}
     </ul>
   {% endfor %}
 {% endfor %}
+{% endblock %}

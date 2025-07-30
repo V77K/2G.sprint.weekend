@@ -1,14 +1,24 @@
 
-<h3>Автоматическая разбивка на группы</h3>
+{% extends "layout.html" %}
+{% block content %}
+<h4>Автоматическая разбивка по группам</h4>
 <form method="post">
-  Этап:
-  <select name="stage">
-    {% for s in stages %}
-      <option value="{{s}}">{{s}}</option>
-    {% endfor %}
-  </select><br><br>
-  Кол-во групп: <input type="number" name="groups"><br><br>
-  Введите фамилии (по одной в строке):<br>
-  <textarea name="names" rows="10" cols="30"></textarea><br><br>
-  <button type="submit">Разбить</button>
+  <div class="mb-3">
+    <label>Этап</label>
+    <select name="stage" class="form-control">
+      {% for s in stages %}
+        <option value="{{s}}">{{s}}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="mb-3">
+    <label>Количество групп</label>
+    <input type="number" name="groups" class="form-control" required>
+  </div>
+  <div class="mb-3">
+    <label>Список фамилий (по одной на строку)</label>
+    <textarea name="names" class="form-control" rows="10"></textarea>
+  </div>
+  <button type="submit" class="btn btn-success">Разбить</button>
 </form>
+{% endblock %}

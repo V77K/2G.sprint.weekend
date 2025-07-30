@@ -1,6 +1,12 @@
 
-<h3>Создание нового этапа</h3>
+{% extends "layout.html" %}
+{% block content %}
+<h4>Создание нового этапа</h4>
 <form method="post">
-  Название этапа: <input name="stage"><br><br>
-  <button type="submit">Создать</button>
+  <div class="mb-3">
+    <label>Название этапа</label>
+    <input name="stage" class="form-control" required>
+  </div>
+  <button type="submit" class="btn btn-primary">Создать</button>
 </form>
+{% endblock %}

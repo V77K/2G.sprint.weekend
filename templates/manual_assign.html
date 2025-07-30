@@ -1,13 +1,24 @@
 
-<h3>Ручное добавление участника</h3>
+{% extends "layout.html" %}
+{% block content %}
+<h4>Ручное добавление участников</h4>
 <form method="post">
-  Этап:
-  <select name="stage">
-    {% for s in stages %}
-      <option value="{{s}}">{{s}}</option>
-    {% endfor %}
-  </select><br><br>
-  Название группы: <input name="group"><br><br>
-  Фамилия участника: <input name="participant"><br><br>
-  <button type="submit">Назначить номер</button>
+  <div class="mb-3">
+    <label>Этап</label>
+    <select name="stage" class="form-control">
+      {% for s in stages %}
+        <option value="{{s}}">{{s}}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="mb-3">
+    <label>Группа</label>
+    <input name="group" class="form-control" required>
+  </div>
+  <div class="mb-3">
+    <label>Фамилии участников (по одной на строку)</label>
+    <textarea name="participants" class="form-control" rows="8"></textarea>
+  </div>
+  <button type="submit" class="btn btn-warning">Добавить</button>
 </form>
+{% endblock %}
