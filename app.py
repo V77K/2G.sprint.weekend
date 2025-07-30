@@ -7,26 +7,35 @@ import random
 app = Flask(__name__)
 DATA_FILE = 'data.json'
 PARTICIPANT_FILE = 'participants.json'
+GROUP_MAP_FILE = 'group_map.json'
 
-def load_data():
-    if not os.path.exists(DATA_FILE):
-        return {}
-    with open(DATA_FILE, 'r', encoding='utf-8') as f:
+def load_json(path, default):
+    if not os.path.exists(path):
+        return default
+    with open(path, 'r', encoding='utf-8') as f:
         return json.load(f)
 
-def save_data(data):
-    with open(DATA_FILE, 'w', encoding='utf-8') as f:
+def save_json(path, data):
+    with open(path, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
+def load_data():
+    return load_json(DATA_FILE, {})
+
+def save_data(data):
+    save_json(DATA_FILE, data)
+
 def load_participants():
-    if not os.path.exists(PARTICIPANT_FILE):
-        return []
-    with open(PARTICIPANT_FILE, 'r', encoding='utf-8') as f:
-        return json.load(f)
+    return load_json(PARTICIPANT_FILE, [])
 
 def save_participants(participants):
-    with open(PARTICIPANT_FILE, 'w', encoding='utf-8') as f:
-        json.dump(participants, f, ensure_ascii=False, indent=2)
+    save_json(PARTICIPANT_FILE, participants)
+
+def load_group_map():
+    return load_json(GROUP_MAP_FILE, {})
+
+def save_group_map(mapping):
+    save_json(GROUP_MAP_FILE, mapping)
 
 def get_used_numbers_for_participant(data, participant):
     used = set()
@@ -73,25 +82,44 @@ def create_stage():
 @app.route('/auto_assign', methods=['GET', 'POST'])
 def auto_assign():
     participants_list = load_participants()
+    group_map = load_group_map()
     if request.method == 'POST':
         stage = request.form['stage']
-        group_count = int(request.form['groups'])
+        group_names_raw = request.form['group_names'].strip()
+        group_count = 0
+        if group_names_raw:
+            group_names = [g.strip() for g in group_names_raw.split(',') if g.strip()]
+            group_count = len(group_names)
+        else:
+            group_count = int(request.form['groups'])
+            group_names = [f'Group {chr(65+i)}' for i in range(group_count)]
+
         if 'use_global' in request.form:
             names = participants_list
         else:
             names = request.form['names'].strip().split('\n')
-        random.shuffle(names)
 
         data = load_data()
         if stage not in data:
             data[stage] = {}
 
-        groups = {f'Group {chr(65+i)}': [] for i in range(group_count)}
-        for i, name in enumerate(names):
-            group_name = f'Group {chr(65 + (i % group_count))}'
-            groups[group_name].append(name)
+        assigned_groups = {name: group_map.get(name) for name in names}
+        unassigned = [name for name, grp in assigned_groups.items() if not grp]
+        random.shuffle(unassigned)
 
-        for group_name, participants in groups.items():
+        for i, name in enumerate(unassigned):
+            group = group_names[i % group_count]
+            group_map[name] = group
+            assigned_groups[name] = group
+
+        save_group_map(group_map)
+
+        # Преобразование в {group: [participants]}
+        groupings = {g: [] for g in group_names}
+        for name, group in assigned_groups.items():
+            groupings[group].append(name)
+
+        for group_name, participants in groupings.items():
             if group_name not in data[stage]:
                 data[stage][group_name] = {}
             for participant in participants:
@@ -125,15 +153,3 @@ def manual_assign():
         return redirect('/')
     data = load_data()
     return render_template('manual_assign.html', stages=data.keys(), participants=participants_list)
-
-@app.route('/clear_data')
-def clear_data():
-    if os.path.exists(DATA_FILE):
-        os.remove(DATA_FILE)
-    return redirect('/')
-
-@app.route('/clear_participants')
-def clear_participants():
-    if os.path.exists(PARTICIPANT_FILE):
-        os.remove(PARTICIPANT_FILE)
-    return redirect('/participants')
