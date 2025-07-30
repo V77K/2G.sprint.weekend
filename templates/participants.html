@@ -1,0 +1,12 @@
+
+{% extends "layout.html" %}
+{% block content %}
+<h4>Список участников</h4>
+<form method="post">
+  <div class="mb-2">
+    <textarea name="participants" class="form-control" rows="10">{% for p in participants %}{{p}}
+{% endfor %}</textarea>
+  </div>
+  <button class="btn btn-success">💾 Сохранить список</button>
+</form>
+{% endblock %}

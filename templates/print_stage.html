@@ -1,0 +1,37 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Стартовый лист — {{stage}}</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 30px; }
+        h1 { font-size: 22px; }
+        .group { margin-bottom: 25px; }
+        .group h2 { font-size: 18px; margin-bottom: 8px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+        td, th { border: 1px solid #ccc; padding: 6px 10px; text-align: left; }
+        @media print {
+            button { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Стартовый лист — {{stage}}</h1>
+    <button onclick="window.print()">🖨 Распечатать</button>
+    {% for group, members in stage_data.items() %}
+      <div class="group">
+        <h2>{{ group }}</h2>
+        <table>
+          <tr><th>№</th><th>Участник</th></tr>
+          {% for name, number in members.items()|sort(attribute='1') %}
+            <tr>
+              <td>{{ number }}</td>
+              <td>{{ name }}</td>
+            </tr>
+          {% endfor %}
+        </table>
+      </div>
+    {% endfor %}
+</body>
+</html>
