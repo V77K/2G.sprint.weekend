@@ -12,21 +12,13 @@
     </select>
   </div>
   <div class="mb-2">
-    <label>Количество групп (если без имён):</label>
-    <input name="groups" type="number" class="form-control">
+    <label>Выберите названия групп:</label><br>
+    {% for letter in 'ABCD' %}
+      <label class="form-check-label me-3">
+        <input type="checkbox" name="group_letters" value="{{letter}}" class="form-check-input"> {{letter}}
+      </label>
+    {% endfor %}
   </div>
-  <div class="mb-2">
-    <label>Названия групп (через запятую):</label>
-    <input name="group_names" type="text" class="form-control" placeholder="A,B,C,D">
-  </div>
-  <div class="mb-2">
-    <label>Список фамилий (если не использовать глобальный):</label>
-    <textarea name="names" class="form-control" rows="5"></textarea>
-  </div>
-  <div class="form-check mb-2">
-    <input type="checkbox" name="use_global" class="form-check-input" id="use_global">
-    <label for="use_global" class="form-check-label">📋 Использовать глобальный список</label>
-  </div>
-  <button class="btn btn-warning">Разбить</button>
+  <button class="btn btn-primary mt-3">Разбить</button>
 </form>
 {% endblock %}
