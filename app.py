@@ -1,58 +1,105 @@
-from flask import Flask, render_template, request
+
+from flask import Flask, render_template, request, redirect
+import json
+import os
 import random
-import math
 
 app = Flask(__name__)
+DATA_FILE = 'data.json'
 
-SESSIONS = ['Квалификация 1', 'Квалификация 2', 'Гонка 1', 'Гонка 2']
+def load_data():
+    if not os.path.exists(DATA_FILE):
+        return {}
+    with open(DATA_FILE, 'r', encoding='utf-8') as f:
+        return json.load(f)
 
-@app.route('/', methods=['GET', 'POST'])
+def save_data(data):
+    with open(DATA_FILE, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+def get_used_numbers_for_participant(data, participant):
+    used = set()
+    for stage in data.values():
+        for group in stage.values():
+            if participant in group:
+                used.add(group[participant])
+    return used
+
+def get_next_free_number(data, group_participants, participant):
+    used_numbers = set(group_participants.values())
+    used_by_person = get_used_numbers_for_participant(data, participant)
+    number = 1
+    while number in used_numbers or number in used_by_person:
+        number += 1
+    return number
+
+@app.route('/')
 def index():
-    results = []
-    final_groups = []
+    data = load_data()
+    return render_template('index.html', stages=data.keys())
+
+@app.route('/create_stage', methods=['GET', 'POST'])
+def create_stage():
     if request.method == 'POST':
-        names = [n.strip() for n in request.form['names'].split('\n') if n.strip()]
-        num_groups = int(request.form['num_groups'])
+        stage_name = request.form['stage']
+        data = load_data()
+        if stage_name not in data:
+            data[stage_name] = {}
+            save_data(data)
+        return redirect('/')
+    return render_template('create_stage.html')
+
+@app.route('/auto_assign', methods=['GET', 'POST'])
+def auto_assign():
+    if request.method == 'POST':
+        stage = request.form['stage']
+        group_count = int(request.form['groups'])
+        names = request.form['names'].strip().split('\n')
         random.shuffle(names)
 
-        grouped = [[] for _ in range(num_groups)]
+        data = load_data()
+        if stage not in data:
+            data[stage] = {}
+
+        groups = {f'Group {chr(65+i)}': [] for i in range(group_count)}
         for i, name in enumerate(names):
-            grouped[i % num_groups].append(name)
+            group_name = f'Group {chr(65 + (i % group_count))}'
+            groups[group_name].append(name)
 
-        used_numbers = {name: set() for name in names}
+        for group_name, participants in groups.items():
+            if group_name not in data[stage]:
+                data[stage][group_name] = {}
+            for participant in participants:
+                number = get_next_free_number(data, data[stage][group_name], participant)
+                data[stage][group_name][participant] = number
 
-        # Генерация для квалификаций и гонок
-        for session in SESSIONS:
-            session_result = []
-            for group in grouped:
-                available_numbers = list(range(1, len(group) + 1))
-                random.shuffle(available_numbers)
-                session_group = []
-                for name in group:
-                    possible_numbers = [n for n in range(1, 100) if n not in used_numbers[name]]
-                    assigned = possible_numbers[0]
-                    used_numbers[name].add(assigned)
-                    session_group.append((name, assigned))
-                session_result.append(session_group)
-            results.append((session, session_result))
+        save_data(data)
+        return redirect('/')
+    data = load_data()
+    return render_template('auto_assign.html', stages=data.keys())
 
-        # Формирование финалов (по алфавиту)
-        sorted_names = sorted(names)
-        final_size = int(math.ceil(len(sorted_names) / num_groups))
-        final_groups_raw = [sorted_names[i:i + final_size] for i in range(0, len(sorted_names), final_size)]
+@app.route('/manual_assign', methods=['GET', 'POST'])
+def manual_assign():
+    if request.method == 'POST':
+        stage = request.form['stage']
+        group = request.form['group']
+        participant = request.form['participant']
 
-        final_result = []
-        for i, group in enumerate(final_groups_raw):
-            session_group = []
-            for name in group:
-                possible_numbers = [n for n in range(1, 100) if n not in used_numbers[name]]
-                assigned = possible_numbers[0]
-                used_numbers[name].add(assigned)
-                session_group.append((name, assigned))
-            final_result.append(session_group)
-        results.append((f'Финалы', final_result))
+        data = load_data()
+        if stage not in data:
+            data[stage] = {}
+        if group not in data[stage]:
+            data[stage][group] = {}
 
-    return render_template('index.html', results=results)
+        number = get_next_free_number(data, data[stage][group], participant)
+        data[stage][group][participant] = number
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080)
+        save_data(data)
+        return redirect('/')
+    data = load_data()
+    return render_template('manual_assign.html', stages=data.keys())
+
+@app.route('/history')
+def history():
+    data = load_data()
+    return render_template('history.html', data=data)

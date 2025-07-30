@@ -1,0 +1,13 @@
+
+<h3>История участников</h3>
+{% for stage, groups in data.items() %}
+  <h4>{{stage}}</h4>
+  {% for group, members in groups.items() %}
+    <b>{{group}}</b><br>
+    <ul>
+    {% for name, number in members.items() %}
+      <li>{{name}} — №{{number}}</li>
+    {% endfor %}
+    </ul>
+  {% endfor %}
+{% endfor %}
