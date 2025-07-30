@@ -32,6 +32,15 @@ def index():
     data = load_data()
     return render_template("index.html", data=data)
 
+@app.route('/participants', methods=['GET', 'POST'])
+def participants():
+    if request.method == 'POST':
+        raw = request.form['participants']
+        people = [p.strip() for p in raw.strip().split('\n') if p.strip()]
+        save_participants(people)
+        return redirect('/participants')
+    return render_template("participants.html", participants=load_participants())
+
 @app.route('/create_stage', methods=['GET', 'POST'])
 def create_stage():
     if request.method == 'POST':
@@ -68,7 +77,6 @@ def auto_assign():
 
         save_group_map(group_map)
 
-        # Формируем группы
         groups = {f'Group {letter}': [] for letter in group_letters}
         for name, group in assigned.items():
             groups[group].append(name)
