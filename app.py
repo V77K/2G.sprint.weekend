@@ -49,79 +49,14 @@ def index():
     data = load_data()
     return render_template('index.html', data=data)
 
-@app.route('/participants', methods=['GET', 'POST'])
-def participants():
-    if request.method == 'POST':
-        raw = request.form['participants']
-        participants = [p.strip() for p in raw.strip().split('\n') if p.strip()]
-        save_participants(participants)
-        return redirect('/')
-    current = load_participants()
-    return render_template('participants.html', participants=current)
+@app.route('/clear_data')
+def clear_data():
+    if os.path.exists(DATA_FILE):
+        os.remove(DATA_FILE)
+    return redirect('/')
 
-@app.route('/create_stage', methods=['GET', 'POST'])
-def create_stage():
-    if request.method == 'POST':
-        stage_name = request.form['stage']
-        data = load_data()
-        if stage_name not in data:
-            data[stage_name] = {}
-            save_data(data)
-        return redirect('/')
-    return render_template('create_stage.html')
-
-@app.route('/auto_assign', methods=['GET', 'POST'])
-def auto_assign():
-    participants_list = load_participants()
-    if request.method == 'POST':
-        stage = request.form['stage']
-        group_count = int(request.form['groups'])
-        if 'use_global' in request.form:
-            names = participants_list
-        else:
-            names = request.form['names'].strip().split('\n')
-        random.shuffle(names)
-
-        data = load_data()
-        if stage not in data:
-            data[stage] = {}
-
-        groups = {f'Group {chr(65+i)}': [] for i in range(group_count)}
-        for i, name in enumerate(names):
-            group_name = f'Group {chr(65 + (i % group_count))}'
-            groups[group_name].append(name)
-
-        for group_name, participants in groups.items():
-            if group_name not in data[stage]:
-                data[stage][group_name] = {}
-            for participant in participants:
-                number = get_next_free_number(data, data[stage][group_name], participant)
-                data[stage][group_name][participant] = number
-
-        save_data(data)
-        return redirect('/')
-    data = load_data()
-    return render_template('auto_assign.html', stages=data.keys())
-
-@app.route('/manual_assign', methods=['GET', 'POST'])
-def manual_assign():
-    participants_list = load_participants()
-    if request.method == 'POST':
-        stage = request.form['stage']
-        group = request.form['group']
-        selected = request.form.getlist('participants')
-
-        data = load_data()
-        if stage not in data:
-            data[stage] = {}
-        if group not in data[stage]:
-            data[stage][group] = {}
-
-        for participant in selected:
-            number = get_next_free_number(data, data[stage][group], participant)
-            data[stage][group][participant] = number
-
-        save_data(data)
-        return redirect('/')
-    data = load_data()
-    return render_template('manual_assign.html', stages=data.keys(), participants=participants_list)
+@app.route('/clear_participants')
+def clear_participants():
+    if os.path.exists(PARTICIPANT_FILE):
+        os.remove(PARTICIPANT_FILE)
+    return redirect('/participants')
